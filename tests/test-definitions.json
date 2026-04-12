@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "Webpart renders correctly",
+      "steps": [
+        { "action": "waitForSelector", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']", "timeout": 30000 },
+        { "action": "assertVisible", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']" },
+        { "action": "assertTextContains", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']", "text": "Welcome to SharePoint" },
+        { "action": "screenshot", "name": "webpart-rendered" }
+      ]
+    },
+    {
+      "name": "Property pane interaction",
+      "steps": [
+        { "action": "waitForSelector", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']", "timeout": 10000 },
+        { "action": "click", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']" },
+        { "action": "waitForTimeout", "timeout": 1000 },
+        { "action": "hover", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']" },
+        { "action": "waitForSelector", "selector": "button[aria-label='Edit web part']", "timeout": 10000 },
+        { "action": "click", "selector": "button[aria-label='Edit web part']" },
+        { "action": "waitForSelector", "selector": "div.spPropertyPaneContainer", "timeout": 10000 },
+        { "action": "assertVisible", "selector": "div.spPropertyPaneContainer" },
+        { "action": "screenshot", "name": "property-pane-open" }
+      ]
+    }
+  ]
+}

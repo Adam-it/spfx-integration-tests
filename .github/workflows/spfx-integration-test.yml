@@ -1,0 +1,95 @@
+name: SPFx Integration Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      spfx_version:
+        description: 'SPFx version (e.g., 1.20.0)'
+        required: true
+        type: string
+      site_url:
+        description: 'SharePoint site URL (e.g., https://contoso.sharepoint.com/sites/test)'
+        required: true
+        type: string
+      cleanup:
+        description: 'Clean up deployed artifacts after tests'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get current date
+        id: date
+        shell: pwsh
+        run: echo "date=$(Get-Date -Format 'yyyy-MM-dd')" >> $env:GITHUB_OUTPUT
+
+      - name: Resolve SPFx version config
+        id: config
+        shell: pwsh
+        run: ./scripts/resolve-spfx-config.ps1 -SpfxVersion "${{ inputs.spfx_version }}"
+
+      - name: Setup Node.js ${{ steps.config.outputs.node_version }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.config.outputs.node_version }}
+
+      - name: Run SPFx Integration Test
+        id: spfx
+        shell: pwsh
+        run: |
+          ./scripts/integration-tests.ps1 `
+            -SpfxVersion "${{ inputs.spfx_version }}" `
+            -SiteUrl "${{ inputs.site_url }}" `
+            -Cleanup $${{ inputs.cleanup }} `
+            -NodeVersion "${{ steps.config.outputs.node_version }}" `
+            -BuildTool "${{ steps.config.outputs.build_tool }}" `
+            -GeneratorVersion "${{ steps.config.outputs.generator_version }}" `
+            -YoVersion "${{ steps.config.outputs.yo_version }}" `
+            -GulpCliVersion "${{ steps.config.outputs.gulp_cli_version }}" `
+            -M365TenantId "${{ secrets.M365_TENANT_ID }}" `
+            -M365AppId "${{ secrets.M365_APP_ID }}" `
+            -M365CertificateBase64 "${{ secrets.M365_CERTIFICATE_BASE64 }}" `
+            -M365CertificatePassword "${{ secrets.M365_CERTIFICATE_PASSWORD }}" `
+            -M365TestUsername "${{ secrets.M365_TEST_USERNAME }}" `
+            -M365TestPassword "${{ secrets.M365_TEST_PASSWORD }}"
+
+      - name: Install Playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run integration tests
+        env:
+          PAGE_URL: ${{ steps.spfx.outputs.page_url }}
+          M365_TEST_USERNAME: ${{ secrets.M365_TEST_USERNAME }}
+          M365_TEST_PASSWORD: ${{ secrets.M365_TEST_PASSWORD }}
+        run: |
+          npx playwright test --config=tests/playwright.config.ts
+
+      - name: Cleanup deployed artifacts
+        if: always() && inputs.cleanup == true
+        shell: pwsh
+        run: |
+          ./scripts/cleanup.ps1 `
+            -SiteUrl "${{ inputs.site_url }}" `
+            -PageName "${{ steps.spfx.outputs.page_name }}" `
+            -AppId "${{ steps.spfx.outputs.app_id }}"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-spfx-${{ inputs.spfx_version }}-${{ steps.date.outputs.date }}
+          path: |
+            playwright-report/
+            test-results/
+            auth-failure.png
+          retention-days: 30
