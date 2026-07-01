@@ -70,9 +70,19 @@ export async function globalAuthSetup(
     await loginToSharePoint(page, siteUrl, username, password);
     await context.storageState({ path: storageStatePath });
   } catch (error) {
-    console.error('Auth failed. Current URL:', page.url());
-    const html = await page.content();
-    console.error('Page HTML:\n', html);
+    const currentUrl = page.url();
+    console.error('Auth failed. Current URL:', currentUrl);
+    const title = await page.title();
+    console.error('Page title:', title);
+    const heading = await page.locator('[role="heading"]').first().textContent().catch(() => null);
+    if (heading) {
+      console.error('Page heading:', heading);
+    }
+    const errorText = await page.locator('[role="alert"]').first().textContent().catch(() => null);
+    if (errorText?.trim()) {
+      console.error('Error message:', errorText.trim());
+    }
+    await page.screenshot({ path: 'auth-failure.png', fullPage: true });
     throw error;
   } finally {
     await browser.close();

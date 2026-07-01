@@ -41,7 +41,7 @@ jobs:
         with:
           node-version: ${{ steps.config.outputs.node_version }}
 
-      - name: Run SPFx Integration Test
+      - name: Run SPFx Setup Integration Test
         id: spfx
         shell: pwsh
         run: |

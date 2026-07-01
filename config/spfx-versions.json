@@ -1,4 +1,16 @@
 {
+  "1.23.2": {
+    "node": "22",
+    "buildTool": "heft",
+    "generator": "1.23.2",
+    "yo": "6"
+  },
+  "1.23": {
+    "node": "22",
+    "buildTool": "heft",
+    "generator": "1.23.0",
+    "yo": "6"
+  },
   "1.22": {
     "node": "22",
     "buildTool": "heft",
