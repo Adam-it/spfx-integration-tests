@@ -6,3 +6,4 @@ blob-report/
 .auth/
 *.sppkg
 spfx-project/
+auth-failure.png
