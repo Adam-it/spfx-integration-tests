@@ -34,9 +34,12 @@ export async function loginToSharePoint(
     // The prompt may not appear in all tenants; continue silently
   }
 
-  // Wait for the redirect back to SharePoint and for the page to settle
+  // Wait for the redirect back to SharePoint and for the page to settle.
+  // Note: do NOT use 'networkidle' here — SharePoint/SPFx pages continuously
+  // make background requests, so the network never goes idle and the wait
+  // would time out even though the page is fully loaded.
   await page.waitForURL(/.*sharepoint\.com.*/, { timeout: 60000 });
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 /**

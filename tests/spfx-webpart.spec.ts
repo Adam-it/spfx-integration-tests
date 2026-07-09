@@ -15,8 +15,15 @@ for (const testDef of testSuite.tests) {
     // Navigate to the test page
     await page.goto(pageUrl, { waitUntil: 'domcontentloaded' });
     
-    // Wait for SharePoint page to fully load
-    await page.waitForLoadState('networkidle');
+    // Wait for SharePoint page to fully load.
+    // Note: do NOT use 'networkidle' — SharePoint/SPFx pages continuously make
+    // background requests, so the network never goes idle and this would time
+    // out. Wait for the canvas/web part zone to be present instead.
+    await page.waitForLoadState('domcontentloaded');
+    await page
+      .locator('.CanvasZone, [data-automation-id="CanvasZone"], .SPCanvas-canvas')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
     
     // Execute the test steps from JSON definition
     await executeTest(page, testDef);
