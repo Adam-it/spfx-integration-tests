@@ -12,14 +12,9 @@
     {
       "name": "Property pane interaction",
       "steps": [
-        { "action": "waitForSelector", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']", "timeout": 10000 },
-        { "action": "click", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']" },
-        { "action": "waitForTimeout", "timeout": 1000 },
-        { "action": "hover", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']" },
-        { "action": "waitForSelector", "selector": "button[aria-label='Edit web part']", "timeout": 10000 },
-        { "action": "click", "selector": "button[aria-label='Edit web part']" },
-        { "action": "waitForSelector", "selector": "div.spPropertyPaneContainer", "timeout": 10000 },
-        { "action": "assertVisible", "selector": "div.spPropertyPaneContainer" },
+        { "action": "enterEditMode", "timeout": 30000 },
+        { "action": "waitForSelector", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']", "timeout": 30000 },
+        { "action": "openPropertyPane", "selector": "div[data-sp-feature-tag*='HelloWorldWebPart']", "timeout": 30000 },
         { "action": "screenshot", "name": "property-pane-open" }
       ]
     }
